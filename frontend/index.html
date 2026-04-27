@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>deepseek对话网页版——航的网站</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+</head>
+
+<body>
+    <header>
+        deepseek对话
+    </header>
+    <main>
+        <h1>欢迎使用deepseek对话网页版</h1>
+        <p>这是deepseek对话的前端页面，您可以在这里与deepseek进行交互。</p>
+    </main>
+    <footer>
+        <div id="inputArea">
+            <textarea id="userInput" placeholder="请输入您的问题..."></textarea>
+            <select id="modelSelect" title="在这里选择使用的模型" onchange="changeModel()">
+                <option value="v3.2chat">v3.2普通</option>
+                <option value="v3.2reasoner">v3.2深度思考</option>
+                <option value="v3.2super">v3.2增强深度思考</option>
+            </select>
+            <button onclick="sendRequest()" id="sendbtn">发送</button>
+        </div>
+        copyright &copy; <span id="copyrightDate">2025</span> 航crh. All rights reserved.
+    </footer>
+    <script>
+        // 获取当前年份
+        const currentYear = new Date().getFullYear();
+        // 设置版权年份
+        document.getElementById('copyrightDate').textContent = currentYear;
+    </script>
+</body>
+
+</html>
