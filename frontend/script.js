@@ -3,29 +3,23 @@ function sendRequest() {
     document.getElementById("sendbtn").disabled = true;
     var chosenModel = document.getElementById("modelSelect").value;
     var message = document.getElementById("userInput").value;
-    var useClient, useModel;
+    var useModel;
     switch (chosenModel) {
         case "v3.2chat":
-            useClient = "normal";
             useModel = "deepseek-chat";
             break;
         case "v3.2reasoner":
-            useClient = "normal";
-            useModel = "deepseek-reasoner";
-            break;
-        case "v3.2super":
-            useClient = "super";
             useModel = "deepseek-reasoner";
             break;
         default:
             console.log("未知模型");
             break;
     }
-    console.log(useClient, useModel, message);
+    console.log(useModel, message);
     var returndata;
     let outerhtml = "<h1>正在生成答复，请稍候...</h1><p>由于技术垃圾，在生成完答复后才会展示回答。</p>";
     document.getElementsByTagName("main")[0].innerHTML = outerhtml;
-    fetch("http://8.138.175.15:32767/" + useClient + "/" + useModel + "/" + encodeURIComponent(message))
+    fetch("http://8.138.175.15:32767/ds/" + useModel + "/" + encodeURIComponent(message))
         .then((response) => response.json())
         .then((data) => {
             returndata = data;
@@ -72,7 +66,18 @@ function processResponse(responseData, useModel) {
 }
 function changeModel() {
     const modelSelect = document.getElementById("modelSelect");
-    if (modelSelect.value == "v3.2super") {
-        alert("deepseeek v3.2增强深度思考版将于2025年12月15日停止支持，请注意时间。");
-    }
+}
+function clearOutputArea() {
+    let outerhtml = "<h1>欢迎使用deepseek对话网页版</h1><p>这是deepseek对话的前端页面，您可以在这里与deepseek进行交互。</p>";
+    document.getElementsByTagName("main")[0].innerHTML = outerhtml;
+}
+function outMenu() {
+    var alertstr = "版本：1.1.0\n\n" +
+        "更新内容：\n" +
+        "1.修复无法对话的问题。\n" +
+        "2.增加此窗口。\n" +
+        "3.移除了已经停止支持的增强版v3.2。\n\n" +
+        "联系开发者：\n" +
+        "邮箱：1317806770@qq.com\n";
+    alert(alertstr);
 }

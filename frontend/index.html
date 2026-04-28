@@ -11,7 +11,7 @@
 
 <body>
     <header>
-        deepseek对话
+        <span onclick="outMenu()">deepseek对话</span>
     </header>
     <main>
         <h1>欢迎使用deepseek对话网页版</h1>
@@ -23,7 +23,6 @@
             <select id="modelSelect" title="在这里选择使用的模型" onchange="changeModel()">
                 <option value="v3.2chat">v3.2普通</option>
                 <option value="v3.2reasoner">v3.2深度思考</option>
-                <option value="v3.2super">v3.2增强深度思考</option>
             </select>
             <button onclick="sendRequest()" id="sendbtn">发送</button>
         </div>

@@ -4,7 +4,7 @@ import getai
 
 app = FastAPI()
 
-origins = ["http://8.138.175.15:32768/"] #允许跨域请求的来源列表
+origins = ["http://8.138.175.15:32768/","*"] #允许跨域请求的来源列表
 
 #允许进行跨域请求(CORS)
 app.add_middleware(
@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-@app.get("/{client}/{model}/{message}")
-async def read_item(client: str,model: str, message: str):
-    resualt = await getai.get_response(client, model, message)
+@app.get("/ds/{model}/{message}")
+async def read_item(model: str, message: str):
+    resualt = await getai.get_response(model, message)
     return resualt
