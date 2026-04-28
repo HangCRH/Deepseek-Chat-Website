@@ -1,7 +1,10 @@
+const WEBSITE_VERSION = "1.2.0";
+var dialogHistory = [];  // 用于存储对话上下文的数组
+var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
 var animationInterval;
 function sendRequest() {
     console.log("开始发送请求");
-    document.getElementById("sendbtn").disabled = true;
+    document.getElementById("sendbtn").disabled = true; // 在发送请求时禁用发送按钮，防止重复点击
     var chosenModel = document.getElementById("modelSelect").value;
     var message = document.getElementById("userInput").value;
     var useModel;
@@ -17,16 +20,34 @@ function sendRequest() {
             break;
     }
     console.log(useModel, message);
-    var returndata;
-    let outerhtml = "<h1>正在生成答复，请稍候<span id='animationArea'>...</span></h1><p>由于技术垃圾，在生成完答复后才会展示回答。</p>";
+    dialogHistory.push({ "role": "user", "content": message });  // 将用户输入添加到对话历史中
+    console.log("当前对话历史：", dialogHistory);
+    // 如果是第一条消息，清空欢迎语
+    if (isFirstMessage) {
+        document.getElementsByTagName("main")[0].innerHTML = "";
+        isFirstMessage = false;
+    }
+    // 在发送请求前先展示提示信息
+    let innerstr = "<h1>正在生成答复，请稍候<span id='animationArea'>...</span></h1><p>由于技术垃圾，在生成完答复后才会展示回答。</p>";
+    var promptDiv = document.createElement("div");
+    promptDiv.innerHTML = innerstr;
+    promptDiv.id = "promptDiv";
+    document.getElementsByTagName("main")[0].appendChild(promptDiv);
     // 添加动画
     animationInterval = setInterval(WaitingAnimation, 500);
-    document.getElementsByTagName("main")[0].innerHTML = outerhtml;
     // 发送请求
-    fetch("http://8.138.175.15:32767/ds/" + useModel + "/" + encodeURIComponent(message))
+    fetch("http://8.138.175.15:32767/ds/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({  // 将数据放在请求体中发送
+            model: useModel,
+            messages: dialogHistory
+        })
+    })
         .then((response) => response.json())
-        .then((data) => {
-            returndata = data;
+        .then((returndata) => {
             console.log("fetch请求成功，返回数据：", returndata);
             processResponse(returndata, useModel);
             document.getElementById("sendbtn").disabled = false;
@@ -72,6 +93,8 @@ function processResponse(responseData, useModel) {
     }
     if (responseData.choices[0].message) {  // 确保message和content存在
         var answerPart = responseData.choices[0].message.content;
+        dialogHistory.push({ "role": "assistant", "content": answerPart });  // 将AI的回答添加到对话历史中
+        console.log("ai回答后的对话历史：", dialogHistory);
     }
     // 创建回答正文元素
     var answerElement = document.createElement("p");
@@ -81,15 +104,20 @@ function processResponse(responseData, useModel) {
     var userQuestionElement = document.createElement("div");
     userQuestionElement.className = "questionArea";
     userQuestionElement.innerText = document.getElementById("userInput").value;
+    // 移除等待模型回答的提示信息
+    var promptDiv = document.getElementById("promptDiv");
+    if (promptDiv) {
+        document.getElementsByTagName("main")[0].removeChild(promptDiv);
+    }
     // 将思考过程和回答正文添加到页面
     var chatArea = document.getElementsByTagName("main")[0];
-    chatArea.innerHTML = "";
     chatArea.appendChild(userQuestionElement);
     if (thinkingElement) {
         chatArea.appendChild(thinkingTitleElement);
         chatArea.appendChild(thinkingElement);
     }
     chatArea.appendChild(answerElement);
+    document.getElementById("userInput").value = "";    // 清空输入框(为了使用体验，在输出答复后才清空输入框)
 }
 function changeModel() {
     const modelSelect = document.getElementById("modelSelect");
@@ -98,12 +126,31 @@ function clearOutputArea() {
     let outerhtml = "<h1>欢迎使用deepseek对话网页版</h1><p>这是deepseek对话的前端页面，您可以在这里与deepseek进行交互。</p>";
     document.getElementsByTagName("main")[0].innerHTML = outerhtml;
 }
+function setNewChat() {
+    if (isFirstMessage) {
+        return; // 如果当前是第一条消息，直接返回，不需要确认，也不需要任何操作
+    }
+    if (!confirm("确定要开启新的对话吗？当前对话历史将被删除，无法恢复！")) {
+        return; // 用户取消，直接返回
+    }
+    isFirstMessage = true;  // 重置第一条消息标记
+    dialogHistory = [];  // 清空对话历史
+    clearOutputArea();   // 清空输出区域
+    // 保留用户输入框中的内容，方便用户继续输入新问题
+}
+window.onbeforeunload = function () {
+    if (!isFirstMessage) { // 只有在已经有消息的情况下才提示，避免用户打开页面时就看到提示
+        return "确定要离开/刷新吗？当前对话历史将丢失，无法恢复！"; // 返回一个字符串会触发浏览器的离开/刷新确认提示
+    }
+}
 function outMenu() {
-    var alertstr = "版本：1.1.1\n\n" +
+    var alertstr = "版本：1.2.0\n\n" +
         "更新内容：\n" +
-        "1.修复了部分显示问题。\n" +
-        "2.每次对话都在模型输出上方显示输入的问题。\n" +
-        "3.在等待模型输出时添加一个小动画。\n\n" +
+        "1、支持连续对话。\n" +
+        "    ·添加“开启新对话”按钮。\n" +
+        "2、在模型回答完毕后清空输入框。\n" +
+        "3、在关闭或刷新时提示用户确认，避免误操作导致对话历史丢失。\n" +
+        "4、部分技术性更新。\n\n" +
         "联系开发者：\n" +
         "邮箱：1317806770@qq.com\n";
     alert(alertstr);

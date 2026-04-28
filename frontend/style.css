@@ -19,10 +19,6 @@ main {
     max-width: 800px;
 }
 
-/* main * {
-    display: inline-block;
-} */
-
 footer {
     position: sticky;
     margin: 20px auto 5px;
