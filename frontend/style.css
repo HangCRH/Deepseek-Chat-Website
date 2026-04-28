@@ -15,7 +15,7 @@ header {
 main {
     margin: auto;
     text-align: center;
-    width: auto;
+    width: calc(100% - 10px);
     max-width: 800px;
 }
 
@@ -31,6 +31,7 @@ footer {
     text-align: center;
     width: auto;
     max-width: 800px;
+    width: calc(100% - 10px);
 }
 
 #inputArea {
@@ -56,6 +57,7 @@ textarea {
     color: rgb(167, 167, 167);
     border-left: 1px solid rgb(211, 211, 211);
     padding-left: 5px;
+    margin-top: 0px;
 }
 
 .answerPart {
@@ -67,4 +69,20 @@ textarea {
     text-align: left;
     color: rgb(0, 0, 0);
     font-size: 17px;
+    margin-top: 15px;
+}
+
+.questionArea {
+    text-align: left;
+    color: rgb(0, 0, 0);
+    font-size: 20px;
+    margin-top: 20px;
+    border-radius: 5px;
+    background-color: rgb(240, 240, 240);
+    padding: 3px;
+    /* 根据内容调整宽度 */
+    width: fit-content;
+    max-width: 600px;
+    /* 右居中 */
+    margin-left: auto;
 }
