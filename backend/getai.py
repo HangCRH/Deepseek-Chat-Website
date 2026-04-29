@@ -1,8 +1,8 @@
-import asyncio, datetime
+import asyncio, datetime, os
 from openai import OpenAI
 
 client_normal = OpenAI(
-    api_key='sk-***',   #还是打个码，原因见以前的backend代码
+    api_key=os.getenv("deepseekAPI"),
     base_url="https://api.deepseek.com/")
 
 async def get_response(use_model, user_message):
