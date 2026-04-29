@@ -23,3 +23,7 @@ app.add_middleware(
 async def read_item(messageWithHistory: Message):
     result = await getai.get_response(messageWithHistory.model, messageWithHistory.messages)
     return result
+
+@app.get("/ds/modellist")
+async def get_model_list():
+    return getai.model_list
