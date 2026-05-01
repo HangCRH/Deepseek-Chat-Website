@@ -1,12 +1,18 @@
 import asyncio, datetime, os
 from openai import OpenAI
 
-#返回给前端的模型列表，前端会根据这个列表展示可选的模型选项，后端需映射成参数
-model_list=["deepseek-v4-flash-chat","deepseek-v4-flash-high","deepseek-v4-flash-max",
-            "deepseek-v4-pro-chat","deepseek-v4-pro-high","deepseek-v4-pro-max"]
+#返回给前端的模型列表，前端会根据这个列表展示可选的模型选项和对应模型名，后端需映射成参数
+model_list=[
+    {"name": "deepseek-v4-flash-chat", "display_name": "DeepSeek V4 Flash 非深度思考"},
+    {"name": "deepseek-v4-flash-high", "display_name": "DeepSeek V4 Flash 深度思考-high"},
+    {"name": "deepseek-v4-flash-max", "display_name": "DeepSeek V4 Flash 深度思考-max"},
+    {"name": "deepseek-v4-pro-chat", "display_name": "DeepSeek V4 Pro 非深度思考"},
+    {"name": "deepseek-v4-pro-high", "display_name": "DeepSeek V4 Pro 深度思考-high"},
+    {"name": "deepseek-v4-pro-max", "display_name": "DeepSeek V4 Pro 深度思考-max"}
+]
 
 #用于将前端模型名映射为请求参数
-model_list_to_param = {
+model_name_to_param = {
     "deepseek-v4-flash-chat": {
         "model": "deepseek-v4-flash",
         "extra_body": {
@@ -55,8 +61,8 @@ client_normal = OpenAI(
 
 async def get_response(use_model, user_message):
     def blocking_call():
-        if model_list_to_param[use_model]:  #模型名存在
-            param = model_list_to_param[use_model]  #根据模型名获取请求参数
+        if model_name_to_param[use_model]:  #模型名存在
+            param = model_name_to_param[use_model]  #根据模型名获取请求参数
             if param["extra_body"]["thinking"] == "enabled":    #思考模式
                 try:
                     return client_normal.chat.completions.create(
