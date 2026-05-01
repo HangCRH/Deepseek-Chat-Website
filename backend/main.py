@@ -21,7 +21,17 @@ app.add_middleware(
 
 @app.post("/ds/")   #这里使用post，原因：使用post可以用请求体发送数据，且在ai对话中post比get更符合http语义建议
 async def read_item(messageWithHistory: Message):
-    result = await getai.get_response(messageWithHistory.model, messageWithHistory.messages)
+    result = None
+    if not messageWithHistory.model or not messageWithHistory.messages:
+        return {"error": "Model and messages are required."}
+    if messageWithHistory.model in ["deepseek-chat","deepseek-reasoner"]:
+        #兼容旧版本(网页版1.3.0+), 这两个名字已经被deepseek官方弃用，替换为deepseek-v4-flash-chat和deepseek-v4-flash-high
+        if messageWithHistory.model == "deepseek-chat":
+            await getai.get_response("deepseek-v4-flash-chat", messageWithHistory.messages)
+        elif messageWithHistory.model == "deepseek-reasoner":
+            await getai.get_response("deepseek-v4-flash-high", messageWithHistory.messages)
+    else:
+        result = await getai.get_response(messageWithHistory.model, messageWithHistory.messages)
     return result
 
 @app.get("/ds/modellist")
