@@ -16,40 +16,52 @@ model_name_to_param = {
     "deepseek-v4-flash-chat": {
         "model": "deepseek-v4-flash",
         "extra_body": {
-            "thinking": "disabled"
+            "thinking": {
+                "type": "disabled"
+            }
         }
     },
     "deepseek-v4-flash-high": {
         "model": "deepseek-v4-flash",
         "extra_body": {
-            "thinking": "enabled"
+            "thinking": {
+                "type": "enabled"
+            }
         },
         "reasoning_effort": "high"
     },
     "deepseek-v4-flash-max": {
         "model": "deepseek-v4-flash",
         "extra_body": {
-            "thinking": "enabled"
+            "thinking": {
+                "type": "enabled"
+            }
         },
         "reasoning_effort": "max"
     },
     "deepseek-v4-pro-chat": {
         "model": "deepseek-v4-pro",
         "extra_body": {
-            "thinking": "disabled"
+            "thinking": {
+                "type": "disabled"
+            }
         }
     },
     "deepseek-v4-pro-high": {
         "model": "deepseek-v4-pro",
         "extra_body": {
-            "thinking": "enabled"
+            "thinking": {
+                "type": "enabled"
+            }
         },
         "reasoning_effort": "high"
     },
     "deepseek-v4-pro-max": {
         "model": "deepseek-v4-pro",
         "extra_body": {
-            "thinking": "enabled"
+            "thinking": {
+                "type": "enabled"
+            }
         },
         "reasoning_effort": "max"
     }
@@ -63,19 +75,19 @@ async def get_response(use_model, user_message):
     def blocking_call():
         if model_name_to_param[use_model]:  #模型名存在
             param = model_name_to_param[use_model]  #根据模型名获取请求参数
-            if param["extra_body"]["thinking"] == "enabled":    #思考模式
+            if param["extra_body"]["thinking"]["type"] == "enabled":    #思考模式
                 try:
                     return client_normal.chat.completions.create(
                         model=param["model"],
                         messages=user_message,  # 由于在客户端已经将用户输入和上下文合并成一个列表，所以这里直接传递这个列表即可
                         extra_body=param["extra_body"],
-                        reasoning_effort=param["reasoning_effect"],
+                        reasoning_effort=param["reasoning_effort"],
                         stream=False
                     )
                 except Exception as e:
                     print(f"Error in blocking_call: {e}")
                     return {"error": str(e)}
-            elif param["extra_body"]["thinking"] == "disabled":  #非思考模式
+            elif param["extra_body"]["thinking"]["type"] == "disabled":  #非思考模式
                 try:
                     return client_normal.chat.completions.create(
                         model=param["model"],

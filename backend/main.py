@@ -27,9 +27,9 @@ async def read_item(messageWithHistory: Message):
     if messageWithHistory.model in ["deepseek-chat","deepseek-reasoner"]:
         #兼容旧版本(网页版1.3.0+), 这两个名字已经被deepseek官方弃用，替换为deepseek-v4-flash-chat和deepseek-v4-flash-high
         if messageWithHistory.model == "deepseek-chat":
-            await getai.get_response("deepseek-v4-flash-chat", messageWithHistory.messages)
+            result = await getai.get_response("deepseek-v4-flash-chat", messageWithHistory.messages)
         elif messageWithHistory.model == "deepseek-reasoner":
-            await getai.get_response("deepseek-v4-flash-high", messageWithHistory.messages)
+            result = await getai.get_response("deepseek-v4-flash-high", messageWithHistory.messages)
     else:
         result = await getai.get_response(messageWithHistory.model, messageWithHistory.messages)
     return result

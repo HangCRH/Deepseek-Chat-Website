@@ -2,6 +2,7 @@ const WEBSITE_VERSION = "1.2.0";
 var dialogHistory = [];  // 用于存储对话上下文的数组
 var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
 var animationInterval;
+const FETCH_URL = "http://localhost:32767/ds/";  //向服务器请求的URL
 function sendRequest() {
     console.log("开始发送请求");
     document.getElementById("sendbtn").disabled = true; // 在发送请求时禁用发送按钮，防止重复点击
@@ -36,7 +37,7 @@ function sendRequest() {
     // 添加动画
     animationInterval = setInterval(WaitingAnimation, 500);
     // 发送请求
-    fetch("http://8.138.175.15:32767/ds/", {
+    fetch(FETCH_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
