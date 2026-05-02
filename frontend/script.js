@@ -54,7 +54,7 @@ function sendRequest() {
     // 添加动画
     animationInterval = setInterval(WaitingAnimation, 500);
     // 发送请求
-    fetch(FETCH_URL + "ds/", {
+    fetch(FETCH_URL + "ds/chat/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
