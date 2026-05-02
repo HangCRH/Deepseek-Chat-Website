@@ -245,7 +245,7 @@ function outMenu() {
     var alertstr = "版本：" + WEBSITE_VERSION + "\n\n" +
         "更新内容：\n" +
         "1、渲染markdown。\n" +
-        "    ·技术支持：zero-md" +
+        "    ·技术支持：zero-md\n" +
         "2、保存历史对话，下次打开都能恢复上一次的记录（除非手动开启新对话）。\n" +
         "\n联系开发者：\n" +
         "邮箱：1317806770@qq.com\n";
