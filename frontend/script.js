@@ -1,4 +1,4 @@
-const WEBSITE_VERSION = "1.3.1";
+const WEBSITE_VERSION = "1.4.0";
 var dialogHistory = [];  // 用于存储对话上下文的数组（不包含思考过程）
 var dialogHistoryForClient = [];  // 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程等内容）
 var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
@@ -195,8 +195,13 @@ function outputAiAnswer(message, reasoningContent = null) {
     }
     // 创建回答正文元素
     var answerElement = document.createElement("p");
+    var answerMarkdownElement = document.createElement("zero-md");
+    var answerScriptForMarkdownElement = document.createElement("script");
     answerElement.className = "answerPart";
-    answerElement.innerText = message;
+    answerScriptForMarkdownElement.type = "text/markdown";
+    answerScriptForMarkdownElement.innerHTML = "\n" + message;
+    answerMarkdownElement.appendChild(answerScriptForMarkdownElement);
+    answerElement.appendChild(answerMarkdownElement);
     // 将思考过程和回答正文添加到页面
     var chatArea = document.getElementsByTagName("main")[0];
     if (thinkingElement) {
