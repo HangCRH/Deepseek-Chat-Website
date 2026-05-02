@@ -1,4 +1,4 @@
-const WEBSITE_VERSION = "1.3.0";
+const WEBSITE_VERSION = "1.3.1";
 var dialogHistory = [];  // 用于存储对话上下文的数组
 var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
 var animationInterval;
