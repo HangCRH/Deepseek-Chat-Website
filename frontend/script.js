@@ -46,40 +46,18 @@ function getDialogHistory() {       //获取存储的对话历史
                 isFirstMessage = false;
             }
             if (eachDialog.role === "user") {
-                // 创建用户输入的问题元素
-                var userQuestionElement = document.createElement("div");
-                userQuestionElement.className = "questionArea";
-                userQuestionElement.innerText = eachDialog.content;
-                var chatArea = document.getElementsByTagName("main")[0];
-                chatArea.appendChild(userQuestionElement);
+                outputUserAnswer(eachDialog.content); // 创建用户输入的问题元素
                 dialogHistory.push({ "role": "user", "content": eachDialog.content }); // 将AI的回答添加到对话历史中
                 thisRole = "assistant"; // 切换角色为assistant，准备检测下一条记录是否符合顺序要求
             }
             if (eachDialog.role === "assistant") {
                 if (eachDialog.reasoning_content) {    //有深度思考内容，要显示出来
                     var thinkingPart = eachDialog.reasoning_content;   // 获取思考过程
-                    // 创建思考过程的标题
-                    var thinkingTitleElement = document.createElement("div");
-                    thinkingTitleElement.className = "eachtitle";
-                    thinkingTitleElement.innerText = "思考过程：\n";
-                    // 创建思考过程的内容元素
-                    var thinkingElement = document.createElement("p");
-                    thinkingElement.className = "thinkingPart";
-                    thinkingElement.innerText = thinkingPart;
+                    outputAiAnswer(eachDialog.content, thinkingPart);   // 输出AI回答和思考过程
+                } else {
+                    outputAiAnswer(eachDialog.content);   // 只输出AI回答
                 }
-                dialogHistory.push({ "role": "assistant", "content": answerPart }); // 将AI的回答添加到对话历史中
-                // 创建回答正文元素
-                var answerElement = document.createElement("p");
-                var answerPart = eachDialog.content;
-                answerElement.className = "answerPart";
-                answerElement.innerText = answerPart;
-                // 将思考过程和回答正文添加到页面
-                var chatArea = document.getElementsByTagName("main")[0];
-                if (thinkingElement) {
-                    chatArea.appendChild(thinkingTitleElement);
-                    chatArea.appendChild(thinkingElement);
-                }
-                chatArea.appendChild(answerElement);
+                dialogHistory.push({ "role": "assistant", "content": eachDialog.content }); // 将AI的回答添加到对话历史中
                 thisRole = "user";  // 切换角色为user，准备检测下一条记录是否符合顺序要求
             }
         }
@@ -161,7 +139,7 @@ function WaitingAnimation() {
 }
 
 function processResponse(responseData, userMessage) {
-    if (responseData.error || !responseData.choices[0].message) {
+    if (responseData.error || !responseData.choices[0].message.content) {
         console.log("后端返回错误。responseData：" + responseData);
         alert("生成答复时出错。Err2\n" + responseData);
         return;
@@ -172,11 +150,40 @@ function processResponse(responseData, userMessage) {
     dialogHistory.push({ "role": "assistant", "content": answerPart });
     //将用户输入添加到用于存储的对话历史中（AI回答稍后添加，因为要考虑是否有深度思考并将正式回答和深度思考都放进去）
     dialogHistoryForClient.push({ "role": "user", "content": userMessage });
+    // 移除等待模型回答的提示信息
+    var promptDiv = document.getElementById("promptDiv");
+    if (promptDiv) {
+        document.getElementsByTagName("main")[0].removeChild(promptDiv);
+    }
+    outputUserAnswer(userMessage); // 创建用户输入的问题元素
     //检查是否有深度思考内容，如果有，将思考内容和正式回答一起添加到用于存储的对话历史中并输出；如果没有，就只添加和输出正式回答
     if (responseData.choices[0].message.reasoning_content) {
         var thinkingPart = responseData.choices[0].message.reasoning_content;   // 获取思考过程
         // 添加含深度思考的AI回答到用于存储的对话记录
         dialogHistoryForClient.push({ "role": "assistant", "content": answerPart, "reasoning_content": thinkingPart });
+        outputAiAnswer(answerPart, thinkingPart);
+    } else {
+        // 没有深度思考，只处理正式回答
+        dialogHistoryForClient.push({ "role": "assistant", "content": answerPart });
+        outputAiAnswer(answerPart);
+    }
+    console.log("ai回答后的对话历史：", dialogHistory);
+    console.log("ai回答后的用于存储的对话历史：", dialogHistoryForClient);
+    // 更新storage
+    localStorage.setItem("dsChat-dialogHistory", JSON.stringify(dialogHistoryForClient));
+    document.getElementById("userInput").value = "";    // 清空输入框(为了使用体验，在输出答复后才清空输入框)
+}
+
+function outputUserAnswer(message) {
+    var userQuestionElement = document.createElement("div");
+    userQuestionElement.className = "questionArea";
+    userQuestionElement.innerText = message;
+    document.getElementsByTagName("main")[0].appendChild(userQuestionElement);
+}
+
+function outputAiAnswer(message, reasoningContent = null) {
+    //检查是否有深度思考内容
+    if (reasoningContent) {
         // 创建思考过程的标题
         var thinkingTitleElement = document.createElement("div");
         thinkingTitleElement.className = "eachtitle";
@@ -184,37 +191,19 @@ function processResponse(responseData, userMessage) {
         // 创建思考过程的内容元素
         var thinkingElement = document.createElement("p");
         thinkingElement.className = "thinkingPart";
-        thinkingElement.innerText = thinkingPart;
-    } else {
-        // 没有深度思考，只添加正式回答到用于存储的对话记录
-        dialogHistoryForClient.push({ "role": "assistant", "content": answerPart });
+        thinkingElement.innerText = reasoningContent;
     }
-    console.log("ai回答后的对话历史：", dialogHistory);
-    console.log("ai回答后的用于存储的对话历史：", dialogHistoryForClient);
-    // 更新storage
-    localStorage.setItem("dsChat-dialogHistory", JSON.stringify(dialogHistoryForClient));
     // 创建回答正文元素
     var answerElement = document.createElement("p");
     answerElement.className = "answerPart";
-    answerElement.innerText = answerPart;
-    // 创建用户输入的问题元素
-    var userQuestionElement = document.createElement("div");
-    userQuestionElement.className = "questionArea";
-    userQuestionElement.innerText = userMessage;
-    // 移除等待模型回答的提示信息
-    var promptDiv = document.getElementById("promptDiv");
-    if (promptDiv) {
-        document.getElementsByTagName("main")[0].removeChild(promptDiv);
-    }
+    answerElement.innerText = message;
     // 将思考过程和回答正文添加到页面
     var chatArea = document.getElementsByTagName("main")[0];
-    chatArea.appendChild(userQuestionElement);
     if (thinkingElement) {
         chatArea.appendChild(thinkingTitleElement);
         chatArea.appendChild(thinkingElement);
     }
     chatArea.appendChild(answerElement);
-    document.getElementById("userInput").value = "";    // 清空输入框(为了使用体验，在输出答复后才清空输入框)
 }
 
 function changeModel() {
