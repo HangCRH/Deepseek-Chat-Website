@@ -1,3 +1,27 @@
+function getModelList() {   //初始化模型列表，网页加载后立即执行
+    function writeModelSelect(modelList) {  //处理获取的模型列表
+        var modelSelector = document.getElementById("modelSelect");
+        modelSelector.innerHTML = "";
+        for (let i = 0; i < modelList.length; i++) {
+            var option = document.createElement("option");
+            option.value = modelList[i].name;           //实际使用的模型名称，发送给后端
+            option.text = modelList[i].display_name;    //展示给用户看的模型名称
+            modelSelector.appendChild(option);          //添加至模型列表选择框
+        }
+    }
+    fetch(FETCH_URL + "ds/modellist/")      //获取模型列表
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("获取模型列表成功，返回数据：", data);
+            writeModelSelect(data);
+        })
+        .catch((err) => {
+            console.error("获取模型列表失败：", err);
+            alert("获取模型列表失败，请刷新页面重试。若问题依旧，请联系开发者，并提供尽可能详细的信息。Err0\n" + err);
+        });
+}
+document.addEventListener("DOMContentLoaded", getModelList);        //在页面加载完成后执行获取模型列表
+
 function sendRequest() {
     console.log("开始发送请求");
     document.getElementById("sendbtn").disabled = true; // 在发送请求时禁用发送按钮，防止重复点击

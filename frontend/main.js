@@ -5,30 +5,6 @@ var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天
 var animationInterval;
 const FETCH_URL = "http://localhost:32767/";  //向服务器请求的根URL
 
-function getModelList() {   //初始化模型列表，网页加载后立即执行
-    function writeModelSelect(modelList) {  //处理获取的模型列表
-        var modelSelector = document.getElementById("modelSelect");
-        modelSelector.innerHTML = "";
-        for (let i = 0; i < modelList.length; i++) {
-            var option = document.createElement("option");
-            option.value = modelList[i].name;           //实际使用的模型名称，发送给后端
-            option.text = modelList[i].display_name;    //展示给用户看的模型名称
-            modelSelector.appendChild(option);          //添加至模型列表选择框
-        }
-    }
-    fetch(FETCH_URL + "ds/modellist/")      //获取模型列表
-        .then((response) => response.json())
-        .then((data) => {
-            console.log("获取模型列表成功，返回数据：", data);
-            writeModelSelect(data);
-        })
-        .catch((err) => {
-            console.error("获取模型列表失败：", err);
-            alert("获取模型列表失败，请刷新页面重试。若问题依旧，请联系开发者，并提供尽可能详细的信息。Err0\n" + err);
-        });
-}
-document.addEventListener("DOMContentLoaded", getModelList);        //在页面加载完成后执行获取模型列表
-
 function getDialogHistory() {       //获取存储的对话历史
     if (localStorage.getItem("dsChat-dialogHistory")) { //存在对话历史记录
         dialogHistoryForClient = JSON.parse(localStorage.getItem("dsChat-dialogHistory"));  // 从localStorage中获取对话历史记录
