@@ -1,4 +1,4 @@
-const WEBSITE_VERSION = "1.4.0";
+const WEBSITE_VERSION = "1.4.1";
 var dialogHistory = [];  // 用于存储对话上下文的数组（不包含思考过程）
 var dialogHistoryForClient = [];  // 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程等内容）
 var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
@@ -244,9 +244,7 @@ window.onbeforeunload = function () {
 function outMenu() {
     var alertstr = "版本：" + WEBSITE_VERSION + "\n\n" +
         "更新内容：\n" +
-        "1、渲染markdown。\n" +
-        "    ·技术支持：zero-md\n" +
-        "2、保存历史对话，下次打开都能恢复上一次的记录（除非手动开启新对话）。\n" +
+        "1、bug修复：输入框不对称（略微偏右）。\n" +
         "\n联系开发者：\n" +
         "邮箱：1317806770@qq.com\n";
     alert(alertstr);
