@@ -9,6 +9,7 @@ body {
 }
 
 header {
+    z-index: 100;
     margin-top: 5px;
     margin-bottom: 10px;
     padding-bottom: 5px;

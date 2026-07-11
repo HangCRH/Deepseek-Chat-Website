@@ -130,6 +130,7 @@ function outMenu() {
     var alertstr = "版本：" + WEBSITE_VERSION + "\n\n" +
         "更新内容：\n" +
         "1、bug修复：输入框不对称（略微偏右）。\n" +
+        "2、标题栏固定在屏幕上方。\n" +
         "\n联系开发者：\n" +
         "邮箱：1317806770@qq.com\n";
     alert(alertstr);
