@@ -48,12 +48,14 @@ document.addEventListener("DOMContentLoaded", showDialogHistory);    //在页面
 
 function createTextElement(content, type) { // 创建文本元素，根据type决定是markdown还是普通文本，目前主要用于输出ai回答
     if (type === "zero-md") {
+        var pElement = document.createElement("p");
         var mdElement = document.createElement("zero-md");
         var scriptElement = document.createElement("script");
         scriptElement.type = "text/markdown";
         scriptElement.innerHTML = "\n" + content;
         mdElement.appendChild(scriptElement);
-        return mdElement;
+        pElement.appendChild(mdElement);
+        return pElement;
     }
     if (type === "text") {
         var textElement = document.createElement("p");
@@ -92,19 +94,12 @@ function outputAiAnswer(message, reasoningContent = null) {
         thinkingTitleElement.className = "eachtitle";
         thinkingTitleElement.innerText = "思考过程：\n";
         // 创建思考过程的内容元素
-        var thinkingElement = document.createElement("p");
+        var thinkingElement = createTextElement(reasoningContent, "text");
         thinkingElement.className = "thinkingPart";
-        thinkingElement.innerText = reasoningContent;
     }
     // 创建回答正文元素
-    var answerElement = document.createElement("p");
-    var answerMarkdownElement = document.createElement("zero-md");
-    var answerScriptForMarkdownElement = document.createElement("script");
+    var answerElement = createTextElement(message, "zero-md");
     answerElement.className = "answerPart";
-    answerScriptForMarkdownElement.type = "text/markdown";
-    answerScriptForMarkdownElement.innerHTML = "\n" + message;
-    answerMarkdownElement.appendChild(answerScriptForMarkdownElement);
-    answerElement.appendChild(answerMarkdownElement);
     // 将思考过程和回答正文添加到页面
     var chatArea = document.getElementsByTagName("main")[0];
     if (thinkingElement) {
