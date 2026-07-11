@@ -62,6 +62,21 @@ function createTextElement(content, type) { // 创建文本元素，根据type�
     }
 }
 
+function createMenuBar(type) {      //创建菜单栏，位于每条ai回答的左下角和用户问题的右下角
+    var menuElement = document.createElement("div");
+    menuElement.className = "menuBar";
+    if (type === "user") {          // 位于用户问题的菜单栏
+        return menuElement;
+    } else if (type === "ai") {     // 位于AI回答的菜单栏
+        var markdownButton = document.createElement("span");
+        markdownButton.className = "menuButton";
+        markdownButton.innerHTML = "<img src='pic/mdButton.png'>";
+        markdownButton.appendChild(document.createTextNode("切换Markdown"));
+        menuElement.appendChild(markdownButton);
+        return menuElement;
+    }
+}
+
 function outputUserAnswer(message) {
     var userQuestionElement = document.createElement("div");
     userQuestionElement.className = "questionArea";
