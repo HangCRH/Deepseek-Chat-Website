@@ -5,7 +5,7 @@ var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天
 var animationInterval;
 const FETCH_URL = "http://localhost:32767/";  //向服务器请求的根URL
 
-function getDialogHistory() {       //获取存储的对话历史
+function showDialogHistory() {       //获取存储的对话历史
     if (localStorage.getItem("dsChat-dialogHistory")) { //存在对话历史记录
         dialogHistoryForClient = JSON.parse(localStorage.getItem("dsChat-dialogHistory"));  // 从localStorage中获取对话历史记录
         var thisRole = "user";  // 当前角色(user/assistant)，用于检测记录是否符合user-assistant-user-assistant的顺序
@@ -44,7 +44,23 @@ function getDialogHistory() {       //获取存储的对话历史
         dialogHistoryForClient = [];    // 初始化对话历史记录的变量(虽然网页刚加载好就是空的，但我不加看着难受——HangCRH)
     }
 }
-document.addEventListener("DOMContentLoaded", getDialogHistory);    //在页面加载完成后执行获取对话历史
+document.addEventListener("DOMContentLoaded", showDialogHistory);    //在页面加载完成后执行获取对话历史
+
+function createTextElement(content, type) { // 创建文本元素，根据type决定是markdown还是普通文本，目前主要用于输出ai回答
+    if (type === "zero-md") {
+        var mdElement = document.createElement("zero-md");
+        var scriptElement = document.createElement("script");
+        scriptElement.type = "text/markdown";
+        scriptElement.innerHTML = "\n" + content;
+        mdElement.appendChild(scriptElement);
+        return mdElement;
+    }
+    if (type === "text") {
+        var textElement = document.createElement("p");
+        textElement.innerText = content;
+        return textElement;
+    }
+}
 
 function outputUserAnswer(message) {
     var userQuestionElement = document.createElement("div");
