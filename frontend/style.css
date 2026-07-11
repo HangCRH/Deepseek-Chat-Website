@@ -14,6 +14,8 @@ header {
     padding-bottom: 5px;
     font-size: 30px;
     position: sticky;
+    top: 0px;
+    background-color: #ffffff;
     text-align: center;
     border-bottom: 2px solid #dadada;
 }
