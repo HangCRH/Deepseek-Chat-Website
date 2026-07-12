@@ -21,7 +21,8 @@ class localStorageManager {
             } else {    //版本号一致，可以直接读取
                 if (localStorage.getItem("dschat-dialogHistory")) { //检查一遍是否存在，防止意外（尽管version正确就应该不会不存在)
                     return {
-                        value: JSON.parse(localStorage.getItem("dschat-dialogHistory"))
+                        value: JSON.parse(localStorage.getItem("dschat-dialogHistory")),
+                        infor: "successful"
                     }
                 }
             }
@@ -58,46 +59,61 @@ class localStorageManager {
     }
 }
 
-function showDialogHistory() {       //获取存储的对话历史
-    if (localStorage.getItem("dsChat-dialogHistory")) { //存在对话历史记录
-        dialogHistoryForClient = JSON.parse(localStorage.getItem("dsChat-dialogHistory"));  // 从localStorage中获取对话历史记录
-        var thisRole = "user";  // 当前角色(user/assistant)，用于检测记录是否符合user-assistant-user-assistant的顺序
-        for (let i = 0; i < dialogHistoryForClient.length; i++) {   // 遍历并渲染每条历史
-            let eachDialog = dialogHistoryForClient[i];
-            if (!eachDialog.role || !eachDialog.content || eachDialog.role !== thisRole) {   // 记录不完整或顺序不对，丢弃这条记录
-                console.warn("检测到不完整或顺序不对的历史记录，已删除存储的历史记录：", eachDialog);
-                localStorage.removeItem("dsChat-dialogHistory");
-                return;
-            }
-            // 如果是第一条消息，清空欢迎语
-            if (isFirstMessage) {
-                document.getElementsByTagName("main")[0].innerHTML = "";
-                isFirstMessage = false;
-            }
-            if (eachDialog.role === "user") {
-                outputUserAnswer(eachDialog.content); // 创建用户输入的问题元素
-                dialogHistory.push({ "role": "user", "content": eachDialog.content }); // 将AI的回答添加到对话历史中
-                thisRole = "assistant"; // 切换角色为assistant，准备检测下一条记录是否符合顺序要求
-            }
-            if (eachDialog.role === "assistant") {
-                if (eachDialog.reasoning_content) {    //有深度思考内容，要显示出来
-                    var thinkingPart = eachDialog.reasoning_content;   // 获取思考过程
-                    outputAiAnswer(eachDialog.content, thinkingPart);   // 输出AI回答和思考过程
-                } else {
-                    outputAiAnswer(eachDialog.content);   // 只输出AI回答
-                }
-                dialogHistory.push({ "role": "assistant", "content": eachDialog.content }); // 将AI的回答添加到对话历史中
-                thisRole = "user";  // 切换角色为user，准备检测下一条记录是否符合顺序要求
-            }
-        }
-        console.log("已输出存储的对话历史，此时上下文：", dialogHistory);
+/**
+ * client历史记录格式
+ * {
+ *  role: user | assistant
+ *  content: <string>
+ *  style: text | zero-md
+ * }
+ */
+
+function initPage() {       //初始化页面
+    var storageResult = localStorageManager.read();  // 从localStorage中获取对话历史记录
+    if (storageResult.infor === "successful") { //存在对话历史记录
+        dialogHistoryForClient = storageResult.value;
+        showDialogHistory(storageResult.value);
     } else {
         console.log("没有读取到对话历史记录");
-        localStorage.setItem("dsChat-dialogHistory", JSON.stringify([]));  // 初始化一个空的对话历史记录
-        dialogHistoryForClient = [];    // 初始化对话历史记录的变量(虽然网页刚加载好就是空的，但我不加看着难受——HangCRH)
     }
 }
-document.addEventListener("DOMContentLoaded", showDialogHistory);    //在页面加载完成后执行获取对话历史
+document.addEventListener("DOMContentLoaded", initPage);    //在页面加载完成后执行获取对话历史
+
+function showDialogHistory(messages) {
+    var thisRole = "user";  // 当前角色(user/assistant)，用于检测记录是否符合user-assistant-user-assistant的顺序
+    for (let i = 0; i < messages.length; i++) {   // 遍历并渲染每条历史
+        let eachDialog = messages[i];
+        if (!eachDialog.role || !eachDialog.content || eachDialog.role !== thisRole) {   // 记录不完整或顺序不对，丢弃所有记录
+            console.warn("检测到不完整或顺序不对的历史记录，已删除存储的历史记录：", eachDialog);
+            localStorageManager.remove();
+            //注意这里要清空全局的历史记录变量
+            dialogHistoryForClient = [];
+            dialogHistory = [];
+            return;
+        }
+        // 如果是第一条消息，清空欢迎语
+        if (isFirstMessage) {
+            document.getElementsByTagName("main")[0].innerHTML = "";
+            isFirstMessage = false;
+        }
+        if (eachDialog.role === "user") {
+            outputUserAnswer(eachDialog.content); // 创建用户输入的问题元素
+            dialogHistory.push({ "role": "user", "content": eachDialog.content }); // 将AI的回答添加到对话历史中
+            thisRole = "assistant"; // 切换角色为assistant，准备检测下一条记录是否符合顺序要求
+        }
+        if (eachDialog.role === "assistant") {
+            if (eachDialog.reasoning_content) {    //有深度思考内容，要显示出来
+                var thinkingPart = eachDialog.reasoning_content;   // 获取思考过程
+                outputAiAnswer(eachDialog.content, thinkingPart, useMarkdown = eachDialog.style);   // 输出AI回答和思考过程
+            } else {
+                outputAiAnswer(eachDialog.content, useMarkdown = eachDialog.style);   // 只输出AI回答
+            }
+            dialogHistory.push({ "role": "assistant", "content": eachDialog.content }); // 将AI的回答添加到对话历史中
+            thisRole = "user";  // 切换角色为user，准备检测下一条记录是否符合顺序要求
+        }
+    }
+    console.log("已输出存储的对话历史，此时上下文：", dialogHistory);
+}
 
 function createTextElement(content, type) { // 创建文本元素，根据type决定是markdown还是普通文本，目前主要用于输出ai回答
     if (type === "zero-md") {
@@ -139,7 +155,7 @@ function outputUserAnswer(message) {
     document.getElementsByTagName("main")[0].appendChild(userQuestionElement);
 }
 
-function outputAiAnswer(message, reasoningContent = null) {
+function outputAiAnswer(message, reasoningContent = null, useMarkdown = "zero-md") {
     //检查是否有深度思考内容
     if (reasoningContent) {
         // 创建思考过程的标题
@@ -151,7 +167,7 @@ function outputAiAnswer(message, reasoningContent = null) {
         thinkingElement.className = "thinkingPart";
     }
     // 创建回答正文元素
-    var answerElement = createTextElement(message, "zero-md");
+    var answerElement = createTextElement(message, useMarkdown);
     answerElement.className = "answerPart";
     // 将思考过程和回答正文添加到页面
     var chatArea = document.getElementsByTagName("main")[0];

@@ -100,11 +100,11 @@ function processResponse(responseData, userMessage) {
         var thinkingPart = responseData.choices[0].message.reasoning_content;   // 获取思考过程
         // 添加含深度思考的AI回答到用于存储的对话记录
         dialogHistoryForClient.push({ "role": "assistant", "content": answerPart, "reasoning_content": thinkingPart });
-        outputAiAnswer(answerPart, thinkingPart);
+        outputAiAnswer(answerPart, thinkingPart, useMarkdown = "text"); //默认不渲染markdown
     } else {
         // 没有深度思考，只处理正式回答
         dialogHistoryForClient.push({ "role": "assistant", "content": answerPart });
-        outputAiAnswer(answerPart);
+        outputAiAnswer(answerPart, useMarkdown = "text");   //默认不渲染markdown
     }
     console.log("ai回答后的对话历史：", dialogHistory);
     console.log("ai回答后的用于存储的对话历史：", dialogHistoryForClient);
