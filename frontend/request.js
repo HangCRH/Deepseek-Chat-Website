@@ -88,7 +88,7 @@ function processResponse(responseData, userMessage) {
     dialogHistory.push({ "role": "user", "content": userMessage });
     dialogHistory.push({ "role": "assistant", "content": answerPart });
     //将用户输入添加到用于存储的对话历史中（AI回答稍后添加，因为要考虑是否有深度思考并将正式回答和深度思考都放进去）
-    dialogHistoryForClient.push({ "role": "user", "content": userMessage });
+    dialogHistoryForClient.push({ "role": "user", "content": userMessage, "style": "text" });
     // 移除等待模型回答的提示信息
     var promptDiv = document.getElementById("promptDiv");
     if (promptDiv) {
@@ -99,16 +99,16 @@ function processResponse(responseData, userMessage) {
     if (responseData.choices[0].message.reasoning_content) {
         var thinkingPart = responseData.choices[0].message.reasoning_content;   // 获取思考过程
         // 添加含深度思考的AI回答到用于存储的对话记录
-        dialogHistoryForClient.push({ "role": "assistant", "content": answerPart, "reasoning_content": thinkingPart });
+        dialogHistoryForClient.push({ "role": "assistant", "content": answerPart, "reasoning_content": thinkingPart, "sytle": "text" });
         outputAiAnswer(answerPart, thinkingPart, useMarkdown = "text"); //默认不渲染markdown
     } else {
         // 没有深度思考，只处理正式回答
-        dialogHistoryForClient.push({ "role": "assistant", "content": answerPart });
+        dialogHistoryForClient.push({ "role": "assistant", "content": answerPart, "style": "text" });
         outputAiAnswer(answerPart, useMarkdown = "text");   //默认不渲染markdown
     }
     console.log("ai回答后的对话历史：", dialogHistory);
     console.log("ai回答后的用于存储的对话历史：", dialogHistoryForClient);
     // 更新storage
-    localStorage.setItem("dsChat-dialogHistory", JSON.stringify(dialogHistoryForClient));
+    localStorageManager.write(dialogHistoryForClient);
     document.getElementById("userInput").value = "";    // 清空输入框(为了使用体验，在输出答复后才清空输入框)
 }

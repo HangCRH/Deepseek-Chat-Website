@@ -62,8 +62,9 @@ class localStorageManager {
 /**
  * client历史记录格式
  * {
- *  role: user | assistant
- *  content: <string>
+ *  role: user | assistant,
+ *  content: <string>,
+ *  [reasoning_content: <string>,]
  *  style: text | zero-md
  * }
  */
