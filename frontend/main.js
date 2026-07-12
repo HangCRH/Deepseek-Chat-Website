@@ -1,8 +1,9 @@
 const WEBSITE_VERSION = "1.4.1";
-const STORAGE_VERSION = "1.0.0";  // 存储版本号，用于判断是否需要清空localStorage中的对话历史记录
-var dialogHistory = [];  // 用于存储对话上下文的数组（不包含思考过程）
-var dialogHistoryForClient = [];  // 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程、markdown设置等内容）
-var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
+const STORAGE_VERSION = "1.0.0";// 存储版本号，用于判断是否需要清空localStorage中的对话历史记录
+var dialogHistory = [];         // 用于存储对话上下文的数组（不包含思考过程）
+var dialogHistoryForClient = [];// 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程、markdown设置等内容）
+var isFirstMessage = true;      // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
+var aiAnswerCount = 0;          // 标记ai回答的条数，用于给每条ai答复绑定一个id
 var animationInterval;
 const FETCH_URL = "http://localhost:32767/";  //向服务器请求的根URL
 
@@ -134,19 +135,29 @@ function createTextElement(content, type) { // 创建文本元素，根据type�
     }
 }
 
-function createMenuBar(type) {      //创建菜单栏，位于每条ai回答的左下角和用户问题的右下角
+function createMenuBar(type, targetId) {      //创建菜单栏，位于每条ai回答的左下角和用户问题的右下角
     var menuElement = document.createElement("div");
     menuElement.className = "menuBar";
     if (type === "user") {          // 位于用户问题的菜单栏
         return menuElement;
     } else if (type === "ai") {     // 位于AI回答的菜单栏
+        //markdown渲染开关
         var markdownButton = document.createElement("span");
         markdownButton.className = "menuBarButton";
         markdownButton.innerHTML = "<img src='pic/mdButton.svg'>";
         markdownButton.appendChild(document.createTextNode("切换Markdown"));
+        //事件绑定
+        markdownButton.onclick = () => { changeMarkdown(targetId) }
         menuElement.appendChild(markdownButton);
         return menuElement;
     }
+}
+
+function changeMarkdown(targetId) {
+    var oldElement = document.getElementById("aiAnswer" + targetId);
+    dialogHistoryForClient[targetId * 2 + 1].style = dialogHistoryForClient[targetId * 2 + 1] == "text" ? "zero-md" : "text"
+    var newElement = createTextElement(dialogHistoryForClient[targetId * 2 + 1].content, dialogHistoryForClient[targetId * 2 + 1].style);
+    document.getElementsByTagName("main")[0].replaceChild(oldElement, newElement)
 }
 
 function outputUserAnswer(message) {
@@ -156,7 +167,7 @@ function outputUserAnswer(message) {
     document.getElementsByTagName("main")[0].appendChild(userQuestionElement);
 }
 
-function outputAiAnswer(message, reasoningContent = null, useMarkdown = "zero-md") {
+function outputAiAnswer(message, reasoningContent = null, useMarkdown = "zero-md", aiAnswerId = null) {
     //检查是否有深度思考内容
     if (reasoningContent) {
         // 创建思考过程的标题
@@ -170,6 +181,7 @@ function outputAiAnswer(message, reasoningContent = null, useMarkdown = "zero-md
     // 创建回答正文元素
     var answerElement = createTextElement(message, useMarkdown);
     answerElement.className = "answerPart";
+    answerElement.id = "aiAnswer" + aiAnswerCount;  //绑定一个id，用于菜单选项
     // 将思考过程和回答正文添加到页面
     var chatArea = document.getElementsByTagName("main")[0];
     if (thinkingElement) {
@@ -178,7 +190,7 @@ function outputAiAnswer(message, reasoningContent = null, useMarkdown = "zero-md
     }
     chatArea.appendChild(answerElement);
     // 创建菜单栏并添加到页面
-    var menuElement = createMenuBar("ai");
+    var menuElement = createMenuBar("ai", aiAnswerCount);
     chatArea.appendChild(menuElement);
 }
 
