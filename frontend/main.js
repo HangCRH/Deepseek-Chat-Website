@@ -1,4 +1,4 @@
-const WEBSITE_VERSION = "1.4.1";
+const WEBSITE_VERSION = "1.5.0";
 const STORAGE_VERSION = "1.0.0";// 存储版本号，用于判断是否需要清空localStorage中的对话历史记录
 var dialogHistory = [];         // 用于存储对话上下文的数组（不包含思考过程）
 var dialogHistoryForClient = [];// 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程、markdown设置等内容）
@@ -327,6 +327,8 @@ function outMenu() {
         "更新内容：\n" +
         "1、bug修复：输入框不对称（略微偏右）。\n" +
         "2、标题栏固定在屏幕上方。\n" +
+        "3、在每轮AI回答下方添加一个菜单，提供一个开关markdown的按钮。\n" +
+        "    ·每条对话的markdown独立，且刷新后不消失。\n" +
         "\n联系开发者：\n" +
         "邮箱：1317806770@qq.com\n";
     alert(alertstr);
