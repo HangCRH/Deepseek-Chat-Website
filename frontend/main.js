@@ -1,9 +1,62 @@
 const WEBSITE_VERSION = "1.4.1";
+const STORAGE_VERSION = "1.0.0";  // 存储版本号，用于判断是否需要清空localStorage中的对话历史记录
 var dialogHistory = [];  // 用于存储对话上下文的数组（不包含思考过程）
 var dialogHistoryForClient = [];  // 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程、markdown设置等内容）
 var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
 var animationInterval;
 const FETCH_URL = "http://localhost:32767/";  //向服务器请求的根URL
+
+class localStorageManager {
+    static read() {     // 读取存储的对话历史
+        if (localStorage.getItem("dsChat-storageVersion")) { //查看是否存在存储版本号
+            var storageVersion = localStorage.getItem("dsChat-storageVersion");
+            if (storageVersion !== STORAGE_VERSION) { //存储版本号不一致，清空对话历史
+                console.log("检测到存储版本号不一致，已清空存储的历史记录：", storageVersion);
+                localStorageManager.remove();
+                localStorageManager.init();
+                return {
+                    value: [],
+                    infor: "error version"
+                };  // 返回一个空的对话历史记录，同时附上信息，告知这是第一次打开新版本（通常用于更新storage格式、弹出新版本弹窗等）
+            } else {    //版本号一致，可以直接读取
+                if (localStorage.getItem("dschat-dialogHistory")) { //检查一遍是否存在，防止意外（尽管version正确就应该不会不存在)
+                    return {
+                        value: JSON.parse(localStorage.getItem("dschat-dialogHistory"))
+                    }
+                }
+            }
+        } else {
+            localStorageManager.init(); // 初始化一个空的对话历史记录
+            return {
+                value: [],
+                infor: "no storage"
+            }
+        }
+    }
+    static remove() {   // 删除存储的对话历史
+        localStorage.removeItem("dsChat-dialogHistory");
+        localStorage.removeItem("dsChat-storageVersion");
+    }
+    static init() {     // 初始化一个空的对话历史记录
+        localStorage.setItem("dsChat-dialogHistory", JSON.stringify([]));
+        localStorage.setItem("dsChat-storageVersion", STORAGE_VERSION);
+    }
+    static write(value) {
+        try {
+            localStorage.setItem("dschat-dialogHistory", JSON.stringify(value))
+        } catch (error) {   //存储时出错
+            console.error(error)
+            return {
+                infor: "error",
+                content: error
+            }
+        }
+        //未出错正常返回
+        return {
+            infor: "successful"
+        }
+    }
+}
 
 function showDialogHistory() {       //获取存储的对话历史
     if (localStorage.getItem("dsChat-dialogHistory")) { //存在对话历史记录
