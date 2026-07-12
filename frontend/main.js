@@ -285,6 +285,7 @@ function setNewChat() {
         return; // 用户取消，直接返回
     }
     isFirstMessage = true;  // 重置第一条消息标记
+    aiAnswerCount = 0;      //重置ai回答数量，防止id分配错误
     dialogHistory = [];  // 清空对话历史
     dialogHistoryForClient = [];  // 清空用于存储的对话历史
     localStorageManager.remove();  // 清空localStorage中的对话历史记录
