@@ -1,6 +1,6 @@
 const WEBSITE_VERSION = "1.4.1";
 var dialogHistory = [];  // 用于存储对话上下文的数组（不包含思考过程）
-var dialogHistoryForClient = [];  // 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程等内容）
+var dialogHistoryForClient = [];  // 用于存储不发送给后端，需要保存在storage的对话历史（包含思考过程、markdown设置等内容）
 var isFirstMessage = true;  // 标记是否是第一条消息(用于在第一天消息时清空欢迎语)
 var animationInterval;
 const FETCH_URL = "http://localhost:32767/";  //向服务器请求的根URL
@@ -71,8 +71,8 @@ function createMenuBar(type) {      //创建菜单栏，位于每条ai回答的�
         return menuElement;
     } else if (type === "ai") {     // 位于AI回答的菜单栏
         var markdownButton = document.createElement("span");
-        markdownButton.className = "menuButton";
-        markdownButton.innerHTML = "<img src='pic/mdButton.png'>";
+        markdownButton.className = "menuBarButton";
+        markdownButton.innerHTML = "<img src='pic/mdButton.svg'>";
         markdownButton.appendChild(document.createTextNode("切换Markdown"));
         menuElement.appendChild(markdownButton);
         return menuElement;
@@ -107,6 +107,9 @@ function outputAiAnswer(message, reasoningContent = null) {
         chatArea.appendChild(thinkingElement);
     }
     chatArea.appendChild(answerElement);
+    // 创建菜单栏并添加到页面
+    var menuElement = createMenuBar("ai");
+    chatArea.appendChild(menuElement);
 }
 
 function changeModel() {
