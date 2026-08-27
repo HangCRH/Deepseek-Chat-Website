@@ -16,8 +16,9 @@
         <span>deepseek对话</span>
         <img id="menuIcon" src="pic/menu.svg" alt="菜单">
         <div id="menuDropdown">
-            <a href="javascript:void(0)" onclick="showDialog('version')">版本信息</a>
-            <a href="javascript:void(0)" onclick="showDialog('about')">关于</a>
+            <a href="javascript:void(0)" onclick="setNewChat()">开启新对话</a>
+            <a href="javascript:void(0)" onclick="showMenu('version')">版本信息</a>
+            <a href="javascript:void(0)" onclick="showMenu('about')">关于</a>
         </div>
     </header>
     <main>
@@ -30,8 +31,7 @@
             <select id="modelSelect" title="在这里选择使用的模型" onchange="changeModel()">
                 <option value="waiting">加载中</option>
             </select>
-            <button onclick="sendRequest()" id="sendbtn">发送</button>&nbsp;
-            <button onclick="setNewChat()" id="clearbtn">开启新对话</button>
+            <button onclick="sendRequest()" id="sendbtn">发送</button>
         </div>
         copyright &copy; <span id="copyrightDate">2025</span> 航crh. All rights reserved.<br>
         内容由AI生成，请注意甄别。

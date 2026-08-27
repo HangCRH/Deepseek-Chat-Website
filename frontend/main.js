@@ -281,17 +281,22 @@ function setNewChat() {
     if (isFirstMessage) {
         return; // 如果当前是第一条消息，直接返回，不需要确认，也不需要任何操作
     }
-    if (!confirm("确定要开启新的对话吗？当前对话历史将被删除，无法恢复！")) {
-        return; // 用户取消，直接返回
-    }
-    isFirstMessage = true;  // 重置第一条消息标记
-    aiAnswerCount = 0;      //重置ai回答数量，防止id分配错误
-    dialogHistory = [];  // 清空对话历史
-    dialogHistoryForClient = [];  // 清空用于存储的对话历史
-    localStorageManager.remove();  // 清空localStorage中的对话历史记录
-    localStorageManager.init();
-    clearOutputArea();   // 清空输出区域
-    // 保留用户输入框中的内容，方便用户继续输入新问题
+    showDialog(`
+        <h2>开启新对话</h2>
+        <p>确定要开启新的对话吗？当前对话历史将被删除，无法恢复！</p>
+    `, "confirm", function (result) {
+        if (!result) {
+            return; // 用户取消（或按 Esc），直接返回
+        }
+        isFirstMessage = true;  // 重置第一条消息标记
+        aiAnswerCount = 0;      //重置ai回答数量，防止id分配错误
+        dialogHistory = [];  // 清空对话历史
+        dialogHistoryForClient = [];  // 清空用于存储的对话历史
+        localStorageManager.remove();  // 清空localStorage中的对话历史记录
+        localStorageManager.init();
+        clearOutputArea();   // 清空输出区域
+        // 保留用户输入框中的内容，方便用户继续输入新问题
+    });
 }
 
 /**
@@ -323,10 +328,18 @@ function WaitingAnimation() {
     }
 }
 
-function showDialog(dialogId) {
-    var dialog = document.getElementById("defaultDialog");
+// 保存当前弹窗的回调函数（用后即清，防止误触发）
+var dialogCallback = null;
+var dialogResult = false;   // 本次弹窗关闭的结果（true=确认/关闭，false=取消/Esc）
+
+/**
+ * 打开菜单弹窗：按 dialogId 取内容，以 alert 类型显示
+ * @param {string} dialogId - 弹窗标识（如 "about"、"version"）
+ */
+function showMenu(dialogId) {
+    var contentHtml = "";
     if (dialogId === "version") {
-        innerStr = `
+        contentHtml = `
             <h2>版本信息</h2>
             <p>版本号：${WEBSITE_VERSION}</p>
             <h2>更新日志：</h2>
@@ -334,17 +347,50 @@ function showDialog(dialogId) {
                 <li>添加了右上角的菜单按钮和下拉菜单。</li>
                 <li>所有弹窗界面升级。</li>
             </ul>
-            <button commandfor="defaultDialog" command="close">关闭</button>
         `;
     } else if (dialogId === "about") {
-        innerStr = `
+        contentHtml = `
             <h2>关于 deepseek 对话网页版</h2>
             <p>作者：HangCRH</p>
             <p>邮箱：<a href="mailto:1317806770@qq.com">1317806770@qq.com</a></p>
             <p>GitHub：<a href="https://github.com/HangCRH/Deepseek-Chat-Website" target="_blank">Deepseek-Chat-Website</a></p>
-            <button commandfor="defaultDialog" command="close">关闭</button>
         `;
     }
+    showDialog(contentHtml, "alert");
+}
+
+/**
+ * 通用弹窗打开函数：内容由调用方传入（不含按钮），按钮由 type 决定
+ * @param {string} contentHtml - 弹窗内容 HTML（不含按钮）
+ * @param {"alert"|"confirm"} [type] - alert=仅关闭按钮，confirm=确认/取消按钮
+ * @param {Function} [callback] - 关闭时执行，result: true=确定/关闭，false=取消/Esc
+ */
+function showDialog(contentHtml, type, callback) {
+    var dialog = document.getElementById("defaultDialog");
+    var innerStr = contentHtml;
+    if (type === "alert") {
+        innerStr += `
+            <button onclick="closeDialog(true)">关闭</button>
+        `;
+    } else if (type === "confirm") {
+        innerStr += `
+            <button onclick="closeDialog(true)">确认</button>
+            <button onclick="closeDialog(false)">取消</button>
+        `;
+    }
+    dialogCallback = (typeof callback === "function") ? callback : null;   // 暂存回调
+    dialogResult = false;                        // 每次打开弹窗重置结果
     dialog.innerHTML = innerStr;
+    // close 事件涵盖所有关闭方式：按钮、声明式 command、Esc 键
+    dialog.onclose = function () {
+        var cb = dialogCallback;
+        dialogCallback = null;                   // 用过即清，防止下一次弹窗误触发
+        if (cb) cb(dialogResult);                // 执行指定函数，result: true=确定/关闭，false=取消/Esc
+    };
     dialog.showModal();
+}
+
+function closeDialog(result) {
+    dialogResult = result;                                             // 记录关闭结果
+    document.getElementById("defaultDialog").close();                  // 关闭弹窗（触发 close 事件 → 执行回调）
 }
