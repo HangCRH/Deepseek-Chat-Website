@@ -323,16 +323,28 @@ function WaitingAnimation() {
     }
 }
 
-function outMenu() {
-    var alertstr = "版本：" + WEBSITE_VERSION + "\n\n" +
-        "此版本更新内容：\n" +
-        "1、修复了新建对话后markdown按钮失效的bug。\n" +
-        "\n此大版本更新内容：\n" +
-        "1、bug修复：输入框不对称（略微偏右）。\n" +
-        "2、标题栏固定在屏幕上方。\n" +
-        "3、在每轮AI回答下方添加一个菜单，提供一个开关markdown的按钮。\n" +
-        "    ·每条对话的markdown独立，且刷新后不消失。\n" +
-        "\n联系开发者：\n" +
-        "邮箱：1317806770@qq.com\n";
-    alert(alertstr);
+function showDialog(dialogId) {
+    var dialog = document.getElementById("defaultDialog");
+    if (dialogId === "version") {
+        innerStr = `
+            <h2>版本信息</h2>
+            <p>版本号：${WEBSITE_VERSION}</p>
+            <h2>更新日志：</h2>
+            <ul>
+                <li>添加了右上角的菜单按钮和下拉菜单。</li>
+                <li>所有弹窗界面升级。</li>
+            </ul>
+            <button commandfor="defaultDialog" command="close">关闭</button>
+        `;
+    } else if (dialogId === "about") {
+        innerStr = `
+            <h2>关于 deepseek 对话网页版</h2>
+            <p>作者：HangCRH</p>
+            <p>邮箱：<a href="mailto:1317806770@qq.com">1317806770@qq.com</a></p>
+            <p>GitHub：<a href="https://github.com/HangCRH/Deepseek-Chat-Website" target="_blank">Deepseek-Chat-Website</a></p>
+            <button commandfor="defaultDialog" command="close">关闭</button>
+        `;
+    }
+    dialog.innerHTML = innerStr;
+    dialog.showModal();
 }
