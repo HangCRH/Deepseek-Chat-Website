@@ -20,6 +20,7 @@ Deepseek-Chat-Website/
 ├── backend/
 │   ├── main.py        # FastAPI 应用：聊天接口、模型列表、CORS 等
 │   └── getai.py       # 模型列表与参数映射，调用 DeepSeek API
+├── requirements.txt   # 后端依赖清单（pip install -r 一键安装）
 └── frontend/
     ├── index.html     # 页面结构
     ├── main.js        # 页面逻辑、对话历史、FETCH_URL 配置
@@ -31,7 +32,7 @@ Deepseek-Chat-Website/
 
 ## 快速开始
 ### 后端
-1. 安装依赖：`pip install "fastapi[standard]" openai`（`fastapi[standard]` 已包含 uvicorn 等服务组件）
+1. 安装依赖：`pip install -r requirements.txt`（依赖清单见项目根目录 `requirements.txt`，含 `fastapi[standard]`、`openai` 等）
 2. 设置环境变量 `deepseekAPI` 为你的 DeepSeek API Key
 3. 在 `backend/` 目录下启动：`uvicorn main:app --port 32767`
 
