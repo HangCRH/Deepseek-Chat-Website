@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek Chat Website · 后端 API 文档</title>
+    <style>
+        :root {
+            --bg: #f7f7f8;
+            --card: #ffffff;
+            --border: #dadada;
+            --text: #1f2328;
+            --muted: #6b7280;
+            --accent: #4c6ef5;
+            --green: #2f9e44;
+            --blue: #1971c2;
+            --orange: #e8590c;
+            --gray: #868e96;
+            --red: #c92a2a;
+            --code-bg: #1e1e2e;
+            --code-fg: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+            line-height: 1.65;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 顶部栏 */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, .92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #4c6ef5, #748ffc);
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-inner h1 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 650;
+        }
+
+        .header-inner .sub {
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .header-badges {
+            margin-left: auto;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        /* 徽章 */
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.7;
+            color: #fff;
+        }
+
+        .badge.formal {
+            background: var(--green);
+        }
+
+        .badge.compat {
+            background: var(--blue);
+        }
+
+        .badge.plan {
+            background: var(--gray);
+        }
+
+        .badge.exp {
+            background: var(--orange);
+        }
+
+        .badge.note {
+            background: #fff;
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+
+        /* 主体布局 */
+        .layout {
+            display: grid;
+            grid-template-columns: 230px 1fr;
+            gap: 28px;
+            padding-top: 24px;
+        }
+
+        .toc {
+            position: sticky;
+            top: 76px;
+            align-self: start;
+            max-height: calc(100vh - 100px);
+            overflow: auto;
+        }
+
+        .toc h2 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin: 0 0 10px;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .toc li {
+            margin: 2px 0;
+        }
+
+        .toc a {
+            display: block;
+            padding: 6px 10px;
+            border-radius: 8px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .toc a:hover {
+            background: #ececf1;
+        }
+
+        .toc a.active {
+            background: #e7ecff;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .toc .lv2 {
+            padding-left: 22px;
+            font-size: 13px;
+        }
+
+        main {
+            min-width: 0;
+            padding-bottom: 60px;
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 21px;
+            font-weight: 700;
+            margin: 0 0 6px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-title .num {
+            background: var(--accent);
+            color: #fff;
+            font-size: 13px;
+            min-width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-desc {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0 0 18px;
+        }
+
+        /* 通知 */
+        .notice {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: #fff9f0;
+            border: 1px solid #ffd8a8;
+            border-left: 4px solid var(--orange);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .notice b {
+            color: var(--orange);
+        }
+
+        /* 表格 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        th {
+            background: #f1f3f5;
+            font-weight: 650;
+            font-size: 13px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td code,
+        th code,
+        p code,
+        li code {
+            background: #eef1f6;
+            border-radius: 5px;
+            padding: 1px 6px;
+            font-size: 13px;
+            font-family: "Cascadia Code", Consolas, monospace;
+            color: #c2255c;
+        }
+
+        /* 端点卡片 */
+        .endpoint {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 18px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+        }
+
+        .endpoint-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            background: #fafbfc;
+        }
+
+        .method {
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: #fff;
+            letter-spacing: .03em;
+        }
+
+        .method.get {
+            background: var(--green);
+        }
+
+        .method.post {
+            background: var(--blue);
+        }
+
+        .endpoint-head .path {
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 15px;
+            font-weight: 650;
+        }
+
+        .endpoint-head .desc {
+            color: var(--muted);
+            font-size: 13px;
+            flex-basis: 100%;
+        }
+
+        .endpoint-body {
+            padding: 16px;
+        }
+
+        .endpoint-body h4 {
+            margin: 14px 0 8px;
+            font-size: 14px;
+        }
+
+        .endpoint-body h4:first-child {
+            margin-top: 0;
+        }
+
+        .endpoint-body p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+
+        .endpoint-body ul {
+            margin: 6px 0 10px;
+            padding-left: 22px;
+            font-size: 14px;
+        }
+
+        /* 代码块 */
+        .codeblock {
+            position: relative;
+            margin: 10px 0 16px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .codeblock .bar {
+            display: flex;
+            align-items: center;
+            background: #2b2b3d;
+            padding: 6px 12px;
+            gap: 8px;
+        }
+
+        .codeblock .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .codeblock .label {
+            color: #a0a6c0;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+
+        .codeblock .copy {
+            margin-left: auto;
+            background: #3a3a55;
+            color: #e5e7eb;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .codeblock .copy:hover {
+            background: #4d4d70;
+        }
+
+        .codeblock pre {
+            margin: 0;
+            padding: 14px 16px;
+            background: var(--code-bg);
+            color: var(--code-fg);
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.6;
+            font-family: "Cascadia Code", Consolas, monospace;
+        }
+
+        /* 键值/字段说明 */
+        .field-table {
+            margin-top: 8px;
+        }
+
+        /* 兼容矩阵 */
+        .matrix td {
+            text-align: center;
+        }
+
+        .matrix td:first-child,
+        .matrix th:first-child {
+            text-align: left;
+        }
+
+        .ok {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .no {
+            color: #adb5bd;
+        }
+
+        .warn {
+            color: var(--orange);
+            font-weight: 700;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 18px 0 30px;
+            color: var(--muted);
+            font-size: 12.5px;
+            text-align: center;
+        }
+
+        @media (max-width: 860px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                position: static;
+                max-height: none;
+            }
+
+            .toc ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .toc li {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container header-inner">
+            <div class="logo">D</div>
+            <div>
+                <h1>DeepSeek Chat Website · 后端 API 文档</h1>
+                <div class="sub">HTTP 接口契约 · 兼容前端 v1.2.0+ · 2026-08-28</div>
+            </div>
+            <div class="header-badges">
+                <span class="badge formal">正式</span>
+                <span class="badge compat">兼容</span>
+                <span class="badge plan">规划</span>
+                <span class="badge exp">试验性</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container layout">
+        <!-- 目录 -->
+        <nav class="toc">
+            <h2>目录</h2>
+            <ul>
+                <li><a href="#sec1">1. 基础信息</a></li>
+                <li><a href="#sec2">2. 端点总览</a></li>
+                <li><a href="#sec3">3. 通用约定</a></li>
+                <li><a href="#sec4">4. 详细接口</a></li>
+                <li><a href="#s41" class="lv2">4.1 模型列表</a></li>
+                <li><a href="#s42" class="lv2">4.2 对话（正式）</a></li>
+                <li><a href="#s43" class="lv2">4.3 对话（v1.2.0 兼容）</a></li>
+                <li><a href="#s44" class="lv2">4.4 版本与能力</a></li>
+                <li><a href="#s45" class="lv2">4.5 流式（试验）</a></li>
+                <li><a href="#sec5">5. 模型与参数映射</a></li>
+                <li><a href="#sec6">6. 错误说明</a></li>
+                <li><a href="#sec7">7. 兼容性与版本</a></li>
+                <li><a href="#sec8">8. 变更记录</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- 1 基础信息 -->
+            <section id="sec1">
+                <h2 class="section-title"><span class="num">1</span>基础信息</h2>
+                <p class="section-desc">后端服务的基础参数与全局约定。</p>
+                <table>
+                    <tr>
+                        <th style="width:160px">项目</th>
+                        <th>值</th>
+                    </tr>
+                    <tr>
+                        <td>服务地址</td>
+                        <td><code>http://&lt;主机&gt;:32767/</code>（前端通过 <code>FETCH_URL</code> 配置）</td>
+                    </tr>
+                    <tr>
+                        <td>协议</td>
+                        <td>HTTP/1.1，UTF-8，JSON</td>
+                    </tr>
+                    <tr>
+                        <td>跨域</td>
+                        <td>CORS 已开启（<code>*</code> 或配置的来源列表）</td>
+                    </tr>
+                    <tr>
+                        <td>认证</td>
+                        <td>无需（API Key 只在后端环境变量 <code>deepseekAPI</code> 中）</td>
+                    </tr>
+                    <tr>
+                        <td>响应格式</td>
+                        <td>聊天接口为 <b>OpenAI 兼容格式</b>（所有版本前端共同依赖）</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 2 端点总览 -->
+            <section id="sec2">
+                <h2 class="section-title"><span class="num">2</span>端点总览</h2>
+                <p class="section-desc">全部端点一览，状态表示当前契约级别。</p>
+                <table>
+                    <tr>
+                        <th>方法</th>
+                        <th>路径</th>
+                        <th>状态</th>
+                        <th>说明</th>
+                        <th>使用方</th>
+                    </tr>
+                    <tr>
+                        <td><span class="method get">GET</span></td>
+                        <td><code>/ds/modellist/</code></td>
+                        <td><span class="badge formal">正式</span></td>
+                        <td>获取可用模型列表</td>
+                        <td>前端 v1.3.0+</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method post">POST</span></td>
+                        <td><code>/ds/chat/</code></td>
+                        <td><span class="badge formal">正式</span></td>
+                        <td>对话（非流式，默认路径）</td>
+                        <td>前端 v1.3.0+</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method post">POST</span></td>
+                        <td><code>/ds/</code></td>
+                        <td><span class="badge compat">兼容</span></td>
+                        <td>旧版对话接口（目标：恢复 POST）</td>
+                        <td>前端 v1.2.0</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method get">GET</span></td>
+                        <td><code>/ds/version/</code></td>
+                        <td><span class="badge plan">规划</span></td>
+                        <td>版本与能力协商</td>
+                        <td>未来前端（可选）</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method post">POST</span></td>
+                        <td><code>/ds/chat/</code> <small>+ <code>stream</code></small></td>
+                        <td><span class="badge exp">试验性</span></td>
+                        <td>流式对话，默认关闭</td>
+                        <td>未来前端</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 3 通用约定 -->
+            <section id="sec3">
+                <h2 class="section-title"><span class="num">3</span>通用约定</h2>
+
+                <h3>3.1 消息格式</h3>
+                <div class="codeblock">
+                    <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                            style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span
+                            class="label">消息示例</span></div>
+                    <pre>{ "role": "user", "content": "你好" }
+{ "role": "assistant", "content": "你好！有什么可以帮你？" }</pre>
+                </div>
+                <ul>
+                    <li><code>role</code>：<code>user</code> 或 <code>assistant</code>。</li>
+                    <li><code>content</code>：消息正文，与 OpenAI 一致。</li>
+                    <li>思考过程（<code>reasoning_content</code>）<b>不放入</b>发送给后端的 <code>messages</code>，只随响应返回。</li>
+                </ul>
+
+                <h3>3.2 模型标识</h3>
+                <ul>
+                    <li>前端通过 <code>/ds/modellist/</code> 获取 <code>name</code>（对外稳定标识），请求时原样传回。</li>
+                    <li>后端将 <code>name</code> 映射为实际 API 模型名与参数（见第 5 节）。</li>
+                    <li>前端 v1.2.0 不使用列表，直接发送旧模型名 <code>deepseek-chat</code> / <code>deepseek-reasoner</code>，由后端别名映射。
+                    </li>
+                </ul>
+
+                <h3>3.3 响应格式（聊天接口）</h3>
+                <table>
+                    <tr>
+                        <th style="width:320px">字段</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td><code>choices[0].message.content</code></td>
+                        <td>AI 回答正文（<b>恒存在，旧前端依赖</b>）</td>
+                    </tr>
+                    <tr>
+                        <td><code>choices[0].message.reasoning_content</code></td>
+                        <td>思考过程（仅深度思考模式存在）</td>
+                    </tr>
+                    <tr>
+                        <td><code>error</code></td>
+                        <td>错误时存在，为字符串（<b>所有版本前端都检查此字段</b>）</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 4 详细接口 -->
+            <section id="sec4">
+                <h2 class="section-title"><span class="num">4</span>详细接口</h2>
+
+                <!-- 4.1 -->
+                <div class="endpoint" id="s41">
+                    <div class="endpoint-head">
+                        <span class="method get">GET</span><span class="path">/ds/modellist/</span>
+                        <span class="badge formal">正式</span>
+                        <span class="desc">获取可用模型列表 · 前端 v1.3.0+</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p><b>请求</b>：无参数。</p>
+                        <p><b>响应</b>：<b>纯数组</b>（不可包装成对象，旧前端直接遍历）：</p>
+                        <div class="codeblock">
+                            <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                                    style="background:#febc2e"></span><span class="dot"
+                                    style="background:#28c840"></span><span class="label">200 OK</span><button
+                                    class="copy">复制</button></div>
+                            <pre>[
+  { "name": "deepseek-v4-flash-chat", "display_name": "DeepSeek V4 Flash 非深度思考" },
+  { "name": "deepseek-v4-flash-high", "display_name": "DeepSeek V4 Flash 深度思考-high" },
+  { "name": "deepseek-v4-flash-max", "display_name": "DeepSeek V4 Flash 深度思考-max" },
+  { "name": "deepseek-v4-pro-chat",   "display_name": "DeepSeek V4 Pro 非深度思考" },
+  { "name": "deepseek-v4-pro-high",   "display_name": "DeepSeek V4 Pro 深度思考-high" },
+  { "name": "deepseek-v4-pro-max",    "display_name": "DeepSeek V4 Pro 深度思考-max" }
+]</pre>
+                        </div>
+                        <ul>
+                            <li>列表中的每个 <code>name</code> 必须可被 <code>/ds/chat/</code> 解析。</li>
+                            <li><code>name</code> 长期稳定，仅 <code>display_name</code> 可随官方命名调整。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 4.2 -->
+                <div class="endpoint" id="s42">
+                    <div class="endpoint-head">
+                        <span class="method post">POST</span><span class="path">/ds/chat/</span>
+                        <span class="badge formal">正式</span>
+                        <span class="desc">对话（非流式，默认路径） · 前端 v1.3.0+</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p><b>请求头</b>：<code>Content-Type: application/json</code></p>
+                        <div class="codeblock">
+                            <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                                    style="background:#febc2e"></span><span class="dot"
+                                    style="background:#28c840"></span><span class="label">请求体</span><button
+                                    class="copy">复制</button></div>
+                            <pre>{
+  "model": "deepseek-v4-flash-high",
+  "messages": [
+    { "role": "user", "content": "你好" },
+    { "role": "assistant", "content": "你好！有什么可以帮你？" },
+    { "role": "user", "content": "用一句话介绍你自己" }
+  ]
+}</pre>
+                        </div>
+                        <table class="field-table">
+                            <tr>
+                                <th style="width:130px">字段</th>
+                                <th style="width:70px">必填</th>
+                                <th>说明</th>
+                            </tr>
+                            <tr>
+                                <td><code>model</code></td>
+                                <td>是</td>
+                                <td>模型列表中的 <code>name</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>messages</code></td>
+                                <td>是</td>
+                                <td>含当前问题在内的完整上下文，非空数组</td>
+                            </tr>
+                            <tr>
+                                <td><code>stream</code></td>
+                                <td>否</td>
+                                <td>未来试验性：是否流式（默认 <code>false</code>；当前忽略）</td>
+                            </tr>
+                        </table>
+                        <p><b>成功响应</b>（OpenAI 兼容）：</p>
+                        <div class="codeblock">
+                            <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                                    style="background:#febc2e"></span><span class="dot"
+                                    style="background:#28c840"></span><span class="label">200 OK</span><button
+                                    class="copy">复制</button></div>
+                            <pre>{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "我是 DeepSeek，一个由深度求索开发的大语言模型。",
+        "reasoning_content": "用户想让我做自我介绍……"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "deepseek-v4-flash",
+  "usage": { "prompt_tokens": 12, "completion_tokens": 30, "total_tokens": 42 }
+}</pre>
+                        </div>
+                        <p><b>失败响应</b>：</p>
+                        <div class="codeblock">
+                            <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                                    style="background:#febc2e"></span><span class="dot"
+                                    style="background:#28c840"></span><span class="label">400 Bad Request</span><button
+                                    class="copy">复制</button></div>
+                            <pre>{ "error": "Model and messages are required." }</pre>
+                        </div>
+                        <p class="section-desc" style="margin-bottom:0">注：<code>reasoning_content</code>
+                            仅深度思考模式返回；非思考模式不返回该字段。前端需兼容"有/无"两种情况。</p>
+                    </div>
+                </div>
+
+                <!-- 4.3 -->
+                <div class="endpoint" id="s43">
+                    <div class="endpoint-head">
+                        <span class="method post">POST</span><span class="path">/ds/</span>
+                        <span class="badge compat">兼容</span>
+                        <span class="desc">旧版对话接口 · 前端 v1.2.0</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="notice">
+                            <div>
+                                <b>当前缺陷：</b>代码中该端点被误写为 <code>GET /ds/</code>，而 v1.2.0 前端发送的是 POST，会导致 405。
+                                <b>目标：恢复为 POST</b>（与 v1.2.0 时代一致）。修复后行为如下：
+                            </div>
+                        </div>
+                        <p><b>请求体</b>：</p>
+                        <div class="codeblock">
+                            <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                                    style="background:#febc2e"></span><span class="dot"
+                                    style="background:#28c840"></span><span class="label">请求体</span><button
+                                    class="copy">复制</button></div>
+                            <pre>{
+  "model": "deepseek-chat",
+  "messages": [
+    { "role": "user", "content": "你好" },
+    { "role": "assistant", "content": "你好！有什么可以帮你？" },
+    { "role": "user", "content": "继续" }
+  ]
+}</pre>
+                        </div>
+                        <table class="field-table">
+                            <tr>
+                                <th style="width:220px"><code>model</code> 取值</th>
+                                <th>映射到</th>
+                            </tr>
+                            <tr>
+                                <td><code>deepseek-chat</code></td>
+                                <td><code>deepseek-v4-flash-chat</code>（V4 Flash 非深度思考）</td>
+                            </tr>
+                            <tr>
+                                <td><code>deepseek-reasoner</code></td>
+                                <td><code>deepseek-v4-flash-high</code>（V4 Flash 深度思考-high）</td>
+                            </tr>
+                        </table>
+                        <p><b>响应</b>：与 <code>/ds/chat/</code> 完全一致（OpenAI 兼容格式）。</p>
+                        <p style="color:var(--muted)">约束：此端点的存在是对 v1.2.0 的承诺；删除它属于破坏性变更，需按废弃流程处理。</p>
+                    </div>
+                </div>
+
+                <!-- 4.4 -->
+                <div class="endpoint" id="s44">
+                    <div class="endpoint-head">
+                        <span class="method get">GET</span><span class="path">/ds/version/</span>
+                        <span class="badge plan">规划</span>
+                        <span class="desc">版本与能力协商 · 未来前端（可选）</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p><b>可选请求头</b>：<code>X-DS-Client-Version: 1.6.0</code>（前端版本号）。</p>
+                        <p class="section-desc" style="margin-bottom:10px">
+                            后端使用版本号的目的<b>仅限于</b>：日志统计、对过旧版本提示"建议升级"、对已知问题版本启用最保守行为。版本号只是<b>输入信息</b>而非<b>决策依据</b>（决策依据是
+                            <code>features</code>）；缺失时按最低兼容处理，<b>绝不拒绝请求</b>。</p>
+                        <div class="codeblock">
+                            <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                                    style="background:#febc2e"></span><span class="dot"
+                                    style="background:#28c840"></span><span class="label">200 OK</span><button
+                                    class="copy">复制</button></div>
+                            <pre>{
+  "backend_version": "1.3.2",
+  "api_version": 1,
+  "features": {
+    "error_codes": true,
+    "retry": true,
+    "stream_experimental": false
+  },
+  "model_list_version": 1
+}</pre>
+                        </div>
+                        <ul>
+                            <li>规则：未声明 / 未拿到能力 = 按最低兼容行为（非流式）。</li>
+                            <li>旧前端不调用此接口，完全无影响。</li>
+                            <li><code>api_version</code> 采用<b>路线 B</b>：冻结在 1.0 后只增不改；破坏性变更先标记废弃、积攒，随下次 MAJOR（2.0.0）合并发布。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 4.5 -->
+                <div class="endpoint" id="s45">
+                    <div class="endpoint-head">
+                        <span class="method post">POST</span><span class="path">/ds/chat/</span>
+                        <span class="badge exp">试验性</span>
+                        <span class="desc">流式对话 · 未来前端 · 默认关闭</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <ul>
+                            <li><b>触发</b>：请求体 <code>stream: true</code> <b>且</b> 后端开关开启（环境变量 / 配置）；默认关闭。</li>
+                            <li><b>定位</b>：测试功能，不参与兼容性承诺；关闭时即使请求 <code>stream: true</code> 也按非流式处理。</li>
+                            <li><b>传输方式</b>：SSE / WebSocket 未定（设计上事件流与传输解耦，倾向先 SSE）。</li>
+                            <li><b>事件类型</b>：<code>content</code>（增量正文）、<code>reasoning</code>（增量思考）、<code>done</code>（结束）、<code>error</code>（失败）。
+                            </li>
+                            <li><b>验证点</b>：流式拼接结果必须与非流式一致。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5 模型映射 -->
+            <section id="sec5">
+                <h2 class="section-title"><span class="num">5</span>模型与参数映射</h2>
+                <p class="section-desc">前端标识 → 实际 API 模型与参数（由后端注册表维护）。</p>
+                <table>
+                    <tr>
+                        <th>前端标识（<code>name</code>）</th>
+                        <th>展示名</th>
+                        <th>实际 API 模型</th>
+                        <th>thinking</th>
+                        <th>reasoning_effort</th>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-v4-flash-chat</code></td>
+                        <td>DeepSeek V4 Flash 非深度思考</td>
+                        <td><code>deepseek-v4-flash</code></td>
+                        <td>disabled</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-v4-flash-high</code></td>
+                        <td>DeepSeek V4 Flash 深度思考-high</td>
+                        <td><code>deepseek-v4-flash</code></td>
+                        <td>enabled</td>
+                        <td>high</td>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-v4-flash-max</code></td>
+                        <td>DeepSeek V4 Flash 深度思考-max</td>
+                        <td><code>deepseek-v4-flash</code></td>
+                        <td>enabled</td>
+                        <td>max</td>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-v4-pro-chat</code></td>
+                        <td>DeepSeek V4 Pro 非深度思考</td>
+                        <td><code>deepseek-v4-pro</code></td>
+                        <td>disabled</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-v4-pro-high</code></td>
+                        <td>DeepSeek V4 Pro 深度思考-high</td>
+                        <td><code>deepseek-v4-pro</code></td>
+                        <td>enabled</td>
+                        <td>high</td>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-v4-pro-max</code></td>
+                        <td>DeepSeek V4 Pro 深度思考-max</td>
+                        <td><code>deepseek-v4-pro</code></td>
+                        <td>enabled</td>
+                        <td>max</td>
+                    </tr>
+                </table>
+                <h3>别名（仅 <code>/ds/</code> 使用）</h3>
+                <table>
+                    <tr>
+                        <th style="width:220px">旧名</th>
+                        <th>别名目标</th>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-chat</code></td>
+                        <td><code>deepseek-v4-flash-chat</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>deepseek-reasoner</code></td>
+                        <td><code>deepseek-v4-flash-high</code></td>
+                    </tr>
+                </table>
+                <ul>
+                    <li>官方模型名 / 参数变化只修改本映射表，前端无感。</li>
+                    <li>未知模型名返回错误 <code>MODEL_NOT_FOUND</code>（不得出现 500）。</li>
+                </ul>
+            </section>
+
+            <!-- 6 错误 -->
+            <section id="sec6">
+                <h2 class="section-title"><span class="num">6</span>错误说明</h2>
+                <p class="section-desc">聊天接口出错时返回顶层 <code>error</code> 字符串（旧前端仅凭此判断成功与否）；附加字段供新前端精确处理。</p>
+                <div class="codeblock">
+                    <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot"
+                            style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span
+                            class="label">错误响应示例</span><button class="copy">复制</button></div>
+                    <pre>{
+  "error": "Rate limit exceeded. Please retry later.",
+  "code": "RATE_LIMITED",
+  "retryable": true,
+  "retry_after": 12
+}</pre>
+                </div>
+                <table>
+                    <tr>
+                        <th style="width:200px">code</th>
+                        <th style="width:100px">HTTP</th>
+                        <th>场景</th>
+                        <th style="width:90px">可重试</th>
+                    </tr>
+                    <tr>
+                        <td><code>INVALID_REQUEST</code></td>
+                        <td>400</td>
+                        <td>缺少 model / messages</td>
+                        <td>否</td>
+                    </tr>
+                    <tr>
+                        <td><code>MODEL_NOT_FOUND</code></td>
+                        <td>400</td>
+                        <td>未知模型名</td>
+                        <td>否</td>
+                    </tr>
+                    <tr>
+                        <td><code>AUTH_FAILED</code></td>
+                        <td>401</td>
+                        <td>API Key 无效</td>
+                        <td>否</td>
+                    </tr>
+                    <tr>
+                        <td><code>RATE_LIMITED</code></td>
+                        <td>429</td>
+                        <td>上游限流</td>
+                        <td>是（尊重 retry_after）</td>
+                    </tr>
+                    <tr>
+                        <td><code>UPSTREAM_ERROR</code></td>
+                        <td>502</td>
+                        <td>上游 5xx / 不可用</td>
+                        <td>是</td>
+                    </tr>
+                    <tr>
+                        <td><code>TIMEOUT</code></td>
+                        <td>504</td>
+                        <td>连接 / 读取超时</td>
+                        <td>是</td>
+                    </tr>
+                    <tr>
+                        <td><code>INTERNAL</code></td>
+                        <td>500</td>
+                        <td>未预期异常</td>
+                        <td>否</td>
+                    </tr>
+                </table>
+                <p style="color:var(--muted);font-size:13px">注：<code>code</code> / <code>retryable</code> /
+                    <code>retry_after</code> 为规划字段，实现前旧前端仅依赖 <code>error</code> 字符串。
+                </p>
+            </section>
+
+            <!-- 7 兼容矩阵 -->
+            <section id="sec7">
+                <h2 class="section-title"><span class="num">7</span>兼容性与版本</h2>
+                <table class="matrix">
+                    <tr>
+                        <th>前端版本</th>
+                        <th><code>POST /ds/</code></th>
+                        <th><code>POST /ds/chat/</code></th>
+                        <th><code>GET /ds/modellist/</code></th>
+                        <th>流式</th>
+                    </tr>
+                    <tr>
+                        <td>v1.2.0</td>
+                        <td><span class="ok">✅</span>（恢复 POST 后）</td>
+                        <td><span class="no">—</span></td>
+                        <td><span class="no">—</span></td>
+                        <td><span class="no">—</span></td>
+                    </tr>
+                    <tr>
+                        <td>v1.3.0 ~ v1.6.0</td>
+                        <td><span class="no">—</span></td>
+                        <td><span class="ok">✅</span></td>
+                        <td><span class="ok">✅</span></td>
+                        <td><span class="no">—</span></td>
+                    </tr>
+                    <tr>
+                        <td>v1.0.0 / v1.1.x</td>
+                        <td><span class="no">❌</span>（路径式，已放弃）</td>
+                        <td><span class="no">❌</span></td>
+                        <td><span class="no">❌</span></td>
+                        <td><span class="no">—</span></td>
+                    </tr>
+                    <tr>
+                        <td>未来前端</td>
+                        <td><span class="no">—</span></td>
+                        <td><span class="ok">✅</span>（默认非流式）</td>
+                        <td><span class="ok">✅</span></td>
+                        <td><span class="warn">⚠️ 测试功能</span></td>
+                    </tr>
+                </table>
+                <ul>
+                    <li>接口"只增不改"；删除承诺范围内接口 = 破坏性变更（需公告 → 升 <code>api_version</code>）。</li>
+                    <li><code>/ds/</code> 的 POST 属已承诺能力，当前 GET 为 bug，将修复。</li>
+                </ul>
+            </section>
+
+            <!-- 8 变更记录 -->
+            <section id="sec8">
+                <h2 class="section-title"><span class="num">8</span>变更记录</h2>
+                <table>
+                    <tr>
+                        <th style="width:140px">日期</th>
+                        <th>内容</th>
+                    </tr>
+                    <tr>
+                        <td>2026-08-28</td>
+                        <td>创建文档；确认 <code>/ds/</code> 恢复 POST（兼容 v1.2.0）；记录模型映射表与错误码规划</td>
+                    </tr>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        DeepSeek Chat Website · 后端 API 文档 · Markdown 版本见 <code>docs/API.md</code> ·
+        兼容前端 v1.2.0+
+    </footer>
+
+    <script>
+        // 代码块复制按钮
+        document.querySelectorAll('.codeblock .copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var pre = btn.closest('.codeblock').querySelector('pre');
+                var text = pre.innerText;
+                navigator.clipboard.writeText(text).then(function () {
+                    var old = btn.textContent;
+                    btn.textContent = '已复制 ✓';
+                    setTimeout(function () { btn.textContent = old; }, 1500);
+                });
+            });
+        });
+
+        // 目录高亮
+        var links = document.querySelectorAll('.toc a');
+        var targets = [];
+        links.forEach(function (a) {
+            var id = a.getAttribute('href').slice(1);
+            var el = document.getElementById(id);
+            if (el) targets.push({ a: a, el: el });
+        });
+        window.addEventListener('scroll', function () {
+            var y = window.scrollY + 90;
+            var current = targets[0];
+            targets.forEach(function (t) { if (t.el.offsetTop <= y) current = t; });
+            links.forEach(function (a) { a.classList.remove('active'); });
+            if (current) current.a.classList.add('active');
+        }, { passive: true });
+    </script>
+</body>
+
+</html>
