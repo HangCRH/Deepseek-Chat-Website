@@ -7,7 +7,7 @@
 
 ## 功能
 - 与 DeepSeek 大语言模型进行对话
-- 支持模型与思考模式切换：V4 Flash / V4 Pro，非深度思考 / 深度思考 high / max
+- 支持模型与思考模式切换：V4.1 Flash / V4 Pro，非深度思考 / 深度思考 low / high / max
 - 前端无违禁词，免费使用
 
 ## 技术栈
@@ -36,15 +36,21 @@ Deepseek-Chat-Website/
 2. 设置环境变量 `deepseekAPI` 为你的 DeepSeek API Key
 3. 在 `backend/` 目录下启动：`uvicorn main:app --port 32767`
 
+> 若改用其他端口或地址，需在前端`frontend/main.js` 中修改 `FETCH_URL`。
+
 ### 前端
-直接用浏览器打开 `frontend/index.html`；后端地址可在 `frontend/main.js` 的 `FETCH_URL` 中修改。
+用编辑器的 Live Server（或其他本地静态服务器）在 **5500 端口**打开 `frontend/index.html`；后端地址可在 `frontend/main.js` 的 `FETCH_URL` 中修改。
+
+> 注意：后端 CORS 白名单目前为 `http://localhost:5500` 与 `http://127.0.0.1:5500`（见 `backend/main.py`）。若直接用 `file://` 打开页面，请求来源为 `null`，会被浏览器拦截导致模型列表加载失败；
+
+> 若改用其他端口或地址，需把对应来源加入白名单。
 
 ## API 接口
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | POST | `/ds/chat/` | 对话接口，请求体包含 model 与 messages |
 | GET | `/ds/modellist/` | 获取可用模型列表 |
-| GET | `/ds/` | 兼容旧版本的对话接口 |
+| POST | `/ds/` | 兼容旧版本的对话接口 |
 
 ## 隐私免责声明
 > ⚠️ 你与模型对话的所有问题都不受保护，可能被读取。请勿在对话中发送敏感信息。
