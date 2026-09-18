@@ -37,16 +37,16 @@ async def get_model_list():
 
 @app.post("/ds/")
 async def old_chat(messageWithHistory: Message):
-    # 兼容旧版本(网页版1.3.0+), 这两个名字已经被deepseek官方弃用，替换为deepseek-v4-flash-chat和deepseek-v4-flash-high
+    # 兼容旧版本(网页版1.3.0+), 这两个名字已经被deepseek官方弃用，替换为deepseek-v4.1-flash-chat和deepseek-v4.1-flash-high
     result = None
     if not messageWithHistory.model or not messageWithHistory.messages:
         return {"error": "Model and messages are required."}
     if messageWithHistory.model == "deepseek-chat":
         result = await getai.get_response(
-            "deepseek-v4-flash-chat", messageWithHistory.messages
+            "deepseek-v4.1-flash-chat", messageWithHistory.messages
         )
     elif messageWithHistory.model == "deepseek-reasoner":
         result = await getai.get_response(
-            "deepseek-v4-flash-high", messageWithHistory.messages
+            "deepseek-v4.1-flash-high", messageWithHistory.messages
         )
     return result
